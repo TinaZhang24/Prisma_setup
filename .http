@@ -54,3 +54,30 @@ DELETE {{host}}/books/9
 
 ### Delete nonexistent book
 DELETE {{host}}/books/18
+
+### Send an array of all the books
+router.get("/", async (req, res, next) => {
+  try {
+    const books = await prisma.book.findMany();
+    res.json(books);
+  } catch (e) {
+    next(e);
+  }
+});
+
+### send a single book with the specified id
+router.get("/:id", async (req, res, next) => {
+  const { id } = req.params;
+
+  try {
+    // `id` has to be converted into a number before looking for it!
+    const book = await prisma.book.findUnique({ where: { id: +id } });
+    if (book) {
+      res.json(book);
+    } else {
+      next({ status: 404, message: `Book with id ${id} does not exist.` });
+    }
+  } catch (e) {
+    next(e);
+  }
+});
